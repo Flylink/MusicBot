@@ -1,5 +1,5 @@
 <img src="https://i.imgur.com/zrE80HY.png" height="200" width="200" alt="">
-
+[![](https://jitpack.io/v/Flylink/MusicBot.svg)](https://jitpack.io/#Flylink/MusicBot)
 # JMusicBot
 
 [![Downloads](https://img.shields.io/github/downloads/jagrosh/MusicBot/total.svg)](https://github.com/jagrosh/MusicBot/releases/latest)
