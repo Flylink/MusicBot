@@ -89,6 +89,8 @@ public class YtdlpAudioSourceManager implements AudioSourceManager
         command.add("--no-playlist");
         command.add("--no-warnings");
         command.add("--dump-single-json");
+        command.add("--extractor-args");
+        command.add("youtube:player_client=tv,ios,android,web");
         if(!cookiesFile.isBlank())
         {
             command.add("--cookies");
