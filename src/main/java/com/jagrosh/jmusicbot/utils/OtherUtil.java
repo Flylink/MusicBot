@@ -40,6 +40,7 @@ import org.json.JSONTokener;
  */
 public class OtherUtil
 {
+    private static final int MINIMUM_JAVA_VERSION = 11;
     public final static String NEW_VERSION_AVAILABLE = "There is a new version of JMusicBot available!\n"
                     + "Current version: %s\n"
                     + "New Version: %s\n\n"
@@ -159,6 +160,16 @@ public class OtherUtil
         if(!System.getProperty("java.vm.name").contains("64"))
             prompt.alert(Prompt.Level.WARNING, "Java Version", 
                     "It appears that you may not be using a supported Java version. Please use 64-bit java.");
+        String specVersion = System.getProperty("java.specification.version", "0");
+        int majorVersion = specVersion.startsWith("1.")
+                ? Integer.parseInt(specVersion.substring(2))
+                : Integer.parseInt(specVersion);
+        if(majorVersion < MINIMUM_JAVA_VERSION)
+        {
+            prompt.alert(Prompt.Level.ERROR, "Java Version",
+                    "Java " + MINIMUM_JAVA_VERSION + " or newer is required. Current version: " + System.getProperty("java.version"));
+            System.exit(1);
+        }
     }
     
     public static void checkVersion(Prompt prompt)

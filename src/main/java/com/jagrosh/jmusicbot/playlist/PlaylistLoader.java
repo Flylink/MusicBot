@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -160,15 +161,21 @@ public class PlaylistLoader
             if(loaded)
                 return;
             loaded = true;
+            if(items.isEmpty())
+            {
+                if(callback != null)
+                    callback.run();
+                return;
+            }
+            AtomicInteger remaining = new AtomicInteger(items.size());
             for(int i=0; i<items.size(); i++)
             {
-                boolean last = i+1 == items.size();
                 int index = i;
                 manager.loadItemOrdered(name, items.get(i), new AudioLoadResultHandler() 
                 {
                     private void done()
                     {
-                        if(last)
+                        if(remaining.decrementAndGet() == 0)
                         {
                             if(shuffle)
                                 shuffleTracks();

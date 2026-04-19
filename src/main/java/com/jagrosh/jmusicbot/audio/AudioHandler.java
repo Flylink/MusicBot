@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Set;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import java.nio.ByteBuffer;
+import java.util.Locale;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -244,7 +244,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
                 eb.setTitle(track.getInfo().title);
             }
 
-            if(track instanceof YoutubeAudioTrack && manager.getBot().getConfig().useNPImages())
+            if(isYoutubeTrack(track) && manager.getBot().getConfig().useNPImages())
             {
                 eb.setThumbnail("https://img.youtube.com/vi/"+track.getIdentifier()+"/mqdefault.jpg");
             }
@@ -326,5 +326,14 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
     private Guild guild(JDA jda)
     {
         return jda.getGuildById(guildId);
+    }
+
+    private boolean isYoutubeTrack(AudioTrack track)
+    {
+        String uri = track.getInfo().uri;
+        if(uri == null)
+            return false;
+        String lower = uri.toLowerCase(Locale.ROOT);
+        return lower.contains("youtube.com") || lower.contains("youtu.be");
     }
 }
