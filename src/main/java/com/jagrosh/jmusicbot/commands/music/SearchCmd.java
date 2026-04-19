@@ -22,9 +22,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import java.util.concurrent.TimeUnit;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -40,7 +38,6 @@ import net.dv8tion.jda.api.entities.Message;
 public class SearchCmd extends MusicCommand 
 {
     protected String searchPrefix = "ytsearch:";
-    private final OrderedMenu.Builder builder;
     private final String searchingEmoji;
     
     public SearchCmd(Bot bot)
@@ -54,12 +51,6 @@ public class SearchCmd extends MusicCommand
         this.beListening = true;
         this.bePlaying = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        builder = new OrderedMenu.Builder()
-                .allowTextInput(true)
-                .useNumbers()
-                .useCancelButton(true)
-                .setEventWaiter(bot.getWaiter())
-                .setTimeout(1, TimeUnit.MINUTES);
     }
     @Override
     public void doCommand(CommandEvent event) 
@@ -103,33 +94,20 @@ public class SearchCmd extends MusicCommand
         @Override
         public void playlistLoaded(AudioPlaylist playlist)
         {
-            builder.setColor(event.getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" Search results for `"+event.getArgs()+"`:"))
-                    .setChoices(new String[0])
-                    .setSelection((msg,i) -> 
-                    {
-                        AudioTrack track = playlist.getTracks().get(i-1);
-                        if(bot.getConfig().isTooLong(track))
-                        {
-                            event.replyWarning("This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
-                                    + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
-                            return;
-                        }
-                        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                        int pos = handler.addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
-                        event.replySuccess("Added **" + FormatUtil.filter(track.getInfo().title)
-                                + "** (`" + TimeUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "to begin playing" 
-                                    : " to the queue at position "+pos));
-                    })
-                    .setCancel((msg) -> {})
-                    .setUsers(event.getAuthor())
-                    ;
+            StringBuilder builder = new StringBuilder(FormatUtil.filter(event.getClient().getSuccess()+" Search results for `"+event.getArgs()+"`:"));
             for(int i=0; i<4 && i<playlist.getTracks().size(); i++)
             {
                 AudioTrack track = playlist.getTracks().get(i);
-                builder.addChoices("`["+ TimeUtil.formatTime(track.getDuration())+"]` [**"+track.getInfo().title+"**]("+track.getInfo().uri+")");
+                builder.append("\n`").append(i + 1).append(". [")
+                        .append(TimeUtil.formatTime(track.getDuration()))
+                        .append("]` **")
+                        .append(FormatUtil.filter(track.getInfo().title))
+                        .append("** <")
+                        .append(track.getInfo().uri)
+                        .append(">");
             }
-            builder.build().display(m);
+            builder.append("\nUse `").append(event.getClient().getPrefix()).append("play <URL>` to queue a specific result.");
+            m.editMessage(builder.toString()).queue();
         }
 
         @Override

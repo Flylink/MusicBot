@@ -16,9 +16,7 @@
 package com.jagrosh.jmusicbot.commands.music;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.menu.Paginator;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -31,7 +29,6 @@ import com.jagrosh.jmusicbot.utils.TimeUtil;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 
 /**
  *
@@ -39,8 +36,6 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
  */
 public class QueueCmd extends MusicCommand 
 {
-    private final Paginator.Builder builder;
-    
     public QueueCmd(Bot bot)
     {
         super(bot);
@@ -50,16 +45,6 @@ public class QueueCmd extends MusicCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
         this.botPermissions = new Permission[]{Permission.MESSAGE_ADD_REACTION,Permission.MESSAGE_EMBED_LINKS};
-        builder = new Paginator.Builder()
-                .setColumns(1)
-                .setFinalAction(m -> {try{m.clearReactions().queue();}catch(PermissionException ignore){}})
-                .setItemsPerPage(10)
-                .waitOnSinglePage(false)
-                .useNumberedItems(true)
-                .showPageNumbers(true)
-                .wrapPageEnds(true)
-                .setEventWaiter(bot.getWaiter())
-                .setTimeout(1, TimeUnit.MINUTES);
     }
 
     @Override
@@ -87,21 +72,19 @@ public class QueueCmd extends MusicCommand
             });
             return;
         }
-        String[] songs = new String[list.size()];
+        StringBuilder page = new StringBuilder();
         long total = 0;
         for(int i=0; i<list.size(); i++)
         {
             total += list.get(i).getTrack().getDuration();
-            songs[i] = list.get(i).toString();
+            if(i >= Math.max(0, (pagenum - 1) * 10) && i < Math.min(list.size(), pagenum * 10))
+                page.append("\n`").append(i + 1).append(".` ").append(list.get(i));
         }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        long fintotal = total;
-        builder.setText((i1,i2) -> getQueueTitle(ah, event.getClient().getSuccess(), songs.length, fintotal, settings.getRepeatMode(), settings.getQueueType()))
-                .setItems(songs)
-                .setUsers(event.getAuthor())
-                .setColor(event.getSelfMember().getColor())
-                ;
-        builder.build().paginate(event.getChannel(), pagenum);
+        int totalPages = (int)Math.ceil(list.size() / 10.0);
+        event.reply(getQueueTitle(ah, event.getClient().getSuccess(), list.size(), total, settings.getRepeatMode(), settings.getQueueType())
+                + page
+                + (totalPages > 1 ? "\nPage `" + pagenum + "/" + totalPages + "`" : ""));
     }
     
     private String getQueueTitle(AudioHandler ah, String success, int songslength, long total, RepeatMode repeatmode, QueueType queueType)

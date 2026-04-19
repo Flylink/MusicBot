@@ -17,7 +17,6 @@ package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.commons.utils.FinderUtil;
-import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.DJCommand;
@@ -25,9 +24,7 @@ import com.jagrosh.jmusicbot.utils.FormatUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
-
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -74,26 +71,14 @@ public class ForceRemoveCmd extends DJCommand
         }
         else if(found.size()>1)
         {
-            OrderedMenu.Builder builder = new OrderedMenu.Builder();
+            StringBuilder builder = new StringBuilder("Found multiple users:");
             for(int i=0; i<found.size() && i<4; i++)
             {
                 Member member = found.get(i);
-                builder.addChoice("**"+member.getUser().getName()+"**#"+member.getUser().getDiscriminator());
+                builder.append("\n - **").append(member.getUser().getName()).append("**#").append(member.getUser().getDiscriminator());
             }
-
-            builder
-            .setSelection((msg, i) -> removeAllEntries(found.get(i-1).getUser(), event))
-            .setText("Found multiple users:")
-            .setColor(event.getSelfMember().getColor())
-            .useNumbers()
-            .setUsers(event.getAuthor())
-            .useCancelButton(true)
-            .setCancel((msg) -> {})
-            .setEventWaiter(bot.getWaiter())
-            .setTimeout(1, TimeUnit.MINUTES)
-
-            .build().display(event.getChannel());
-
+            builder.append("\nPlease refine your query.");
+            event.replyWarning(builder.toString());
             return;
         }
         else
