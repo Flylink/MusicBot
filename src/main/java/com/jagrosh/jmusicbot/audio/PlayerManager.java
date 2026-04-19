@@ -30,9 +30,7 @@ import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceM
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import dev.lavalink.youtube.clients.Android;
 import dev.lavalink.youtube.clients.Music;
-import dev.lavalink.youtube.clients.TvHtml5Embedded;
 import dev.lavalink.youtube.clients.Web;
 import dev.lavalink.youtube.clients.WebEmbedded;
 import net.dv8tion.jda.api.entities.Guild;
@@ -57,9 +55,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
         YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(true,
                 new Music(),
                 new Web(),
-                new WebEmbedded(),
-                new Android(),
-                new TvHtml5Embedded());
+                new WebEmbedded());
         yt.setPlaylistPageCount(bot.getConfig().getMaxYTPlaylistPages());
         registerSourceManager(yt);
 
