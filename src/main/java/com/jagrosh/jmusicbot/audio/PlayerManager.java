@@ -31,6 +31,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.Music;
+import dev.lavalink.youtube.clients.Tv;
 import dev.lavalink.youtube.clients.Web;
 import dev.lavalink.youtube.clients.WebEmbedded;
 import net.dv8tion.jda.api.entities.Guild;
@@ -53,9 +54,17 @@ public class PlayerManager extends DefaultAudioPlayerManager
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(t -> registerSourceManager(t));
 
         YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(true,
+                new Tv(),
                 new Music(),
                 new Web(),
                 new WebEmbedded());
+        String poToken = bot.getConfig().getYoutubePoToken();
+        String visitorData = bot.getConfig().getYoutubeVisitorData();
+        if(poToken != null && !poToken.isBlank() && visitorData != null && !visitorData.isBlank())
+        {
+            Web.setPoTokenAndVisitorData(poToken, visitorData);
+            WebEmbedded.setPoTokenAndVisitorData(poToken, visitorData);
+        }
         String refreshToken = bot.getConfig().getYoutubeOauthRefreshToken();
         if(refreshToken != null && !refreshToken.isBlank())
             yt.useOauth2(refreshToken, true);

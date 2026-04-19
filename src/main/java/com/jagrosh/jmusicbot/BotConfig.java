@@ -41,7 +41,7 @@ public class BotConfig
     private Path path = null;
     private String token, prefix, altprefix, helpWord, playlistsFolder, logLevel,
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
-            evalEngine, youtubeOauthRefreshToken;
+            evalEngine, youtubeOauthRefreshToken, youtubePoToken, youtubeVisitorData;
     private boolean stayInChannel, songInGame, npImages, updatealerts, useEval, dbots, youtubeOauthAutoInit;
     private long owner, maxSeconds, aloneTimeUntilStop;
     private int maxYTPlaylistPages;
@@ -100,6 +100,8 @@ public class BotConfig
             skipratio = config.getDouble("skipratio");
             youtubeOauthRefreshToken = config.getString("youtube.oauth.refresh_token");
             youtubeOauthAutoInit = config.getBoolean("youtube.oauth.auto_init");
+            youtubePoToken = config.getString("youtube.pot.token");
+            youtubeVisitorData = config.getString("youtube.pot.visitor_data");
             dbots = owner == 113156185389092864L;
             
             // we may need to write a new config file
@@ -392,5 +394,15 @@ public class BotConfig
     public boolean useYoutubeOauthAutoInit()
     {
         return youtubeOauthAutoInit;
+    }
+
+    public String getYoutubePoToken()
+    {
+        return youtubePoToken;
+    }
+
+    public String getYoutubeVisitorData()
+    {
+        return youtubeVisitorData;
     }
 }
