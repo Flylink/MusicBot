@@ -41,7 +41,8 @@ public class BotConfig
     private Path path = null;
     private String token, prefix, altprefix, helpWord, playlistsFolder, logLevel,
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
-            evalEngine, youtubeOauthRefreshToken, youtubePoToken, youtubeVisitorData;
+            evalEngine, youtubeOauthRefreshToken, youtubePoToken, youtubeVisitorData, youtubeYtdlpPath,
+            youtubeYtdlpCookiesFromBrowser, youtubeYtdlpCookiesFile;
     private boolean stayInChannel, songInGame, npImages, updatealerts, useEval, dbots, youtubeOauthAutoInit;
     private long owner, maxSeconds, aloneTimeUntilStop;
     private int maxYTPlaylistPages;
@@ -102,6 +103,9 @@ public class BotConfig
             youtubeOauthAutoInit = config.getBoolean("youtube.oauth.auto_init");
             youtubePoToken = config.getString("youtube.pot.token");
             youtubeVisitorData = config.getString("youtube.pot.visitor_data");
+            youtubeYtdlpPath = config.getString("youtube.ytdlp.path");
+            youtubeYtdlpCookiesFromBrowser = config.getString("youtube.ytdlp.cookies_from_browser");
+            youtubeYtdlpCookiesFile = config.getString("youtube.ytdlp.cookies_file");
             dbots = owner == 113156185389092864L;
             
             // we may need to write a new config file
@@ -404,5 +408,20 @@ public class BotConfig
     public String getYoutubeVisitorData()
     {
         return youtubeVisitorData;
+    }
+
+    public String getYoutubeYtdlpPath()
+    {
+        return youtubeYtdlpPath;
+    }
+
+    public String getYoutubeYtdlpCookiesFromBrowser()
+    {
+        return youtubeYtdlpCookiesFromBrowser;
+    }
+
+    public String getYoutubeYtdlpCookiesFile()
+    {
+        return youtubeYtdlpCookiesFile;
     }
 }

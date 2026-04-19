@@ -30,11 +30,18 @@ import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceM
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.clients.AndroidMusic;
+import dev.lavalink.youtube.clients.AndroidVr;
+import dev.lavalink.youtube.clients.MWeb;
 import dev.lavalink.youtube.clients.Music;
 import dev.lavalink.youtube.clients.Tv;
+import dev.lavalink.youtube.clients.TvHtml5Simply;
 import dev.lavalink.youtube.clients.Web;
 import dev.lavalink.youtube.clients.WebEmbedded;
+import dev.lavalink.youtube.clients.skeleton.Client;
 import net.dv8tion.jda.api.entities.Guild;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,6 +49,7 @@ import net.dv8tion.jda.api.entities.Guild;
  */
 public class PlayerManager extends DefaultAudioPlayerManager
 {
+    private static final Logger LOG = LoggerFactory.getLogger(PlayerManager.class);
     private final Bot bot;
     
     public PlayerManager(Bot bot)
@@ -52,24 +60,60 @@ public class PlayerManager extends DefaultAudioPlayerManager
     public void init()
     {
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(t -> registerSourceManager(t));
+        registerSourceManager(new YtdlpAudioSourceManager(
+                bot.getConfig().getYoutubeYtdlpPath(),
+                bot.getConfig().getYoutubeYtdlpCookiesFromBrowser(),
+                bot.getConfig().getYoutubeYtdlpCookiesFile()));
 
-        YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(true,
-                new Tv(),
-                new Music(),
-                new Web(),
-                new WebEmbedded());
         String poToken = bot.getConfig().getYoutubePoToken();
         String visitorData = bot.getConfig().getYoutubeVisitorData();
-        if(poToken != null && !poToken.isBlank() && visitorData != null && !visitorData.isBlank())
+        boolean hasPoToken = poToken != null && !poToken.isBlank() && visitorData != null && !visitorData.isBlank();
+        if(hasPoToken)
         {
             Web.setPoTokenAndVisitorData(poToken, visitorData);
             WebEmbedded.setPoTokenAndVisitorData(poToken, visitorData);
+            LOG.info("Configured YouTube poToken support for WEB clients");
         }
+
+        Client[] youtubeClients = hasPoToken
+                ? new Client[] {
+                    new Web(),
+                    new WebEmbedded(),
+                    new Music(),
+                    new AndroidVr(),
+                    new AndroidMusic(),
+                    new MWeb(),
+                    new TvHtml5Simply(),
+                    new Tv()
+                }
+                : new Client[] {
+                    new Music(),
+                    new AndroidVr(),
+                    new AndroidMusic(),
+                    new MWeb(),
+                    new Web(),
+                    new WebEmbedded(),
+                    new TvHtml5Simply(),
+                    new Tv()
+                };
+
+        YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(true, youtubeClients);
+
         String refreshToken = bot.getConfig().getYoutubeOauthRefreshToken();
-        if(refreshToken != null && !refreshToken.isBlank())
+        if(hasPoToken)
+        {
+            LOG.info("Skipping YouTube OAuth because poToken is configured");
+        }
+        else if(refreshToken != null && !refreshToken.isBlank())
             yt.useOauth2(refreshToken, true);
         else if(bot.getConfig().useYoutubeOauthAutoInit())
             yt.useOauth2(null, false);
+
+        LOG.info("Configured YouTube clients: {}",
+                java.util.Arrays.stream(youtubeClients)
+                        .map(Client::getIdentifier)
+                        .reduce((left, right) -> left + ", " + right)
+                        .orElse("<none>"));
         yt.setPlaylistPageCount(bot.getConfig().getMaxYTPlaylistPages());
         registerSourceManager(yt);
 
