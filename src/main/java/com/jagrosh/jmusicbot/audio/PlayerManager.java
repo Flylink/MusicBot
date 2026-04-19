@@ -56,6 +56,11 @@ public class PlayerManager extends DefaultAudioPlayerManager
                 new Music(),
                 new Web(),
                 new WebEmbedded());
+        String refreshToken = bot.getConfig().getYoutubeOauthRefreshToken();
+        if(refreshToken != null && !refreshToken.isBlank())
+            yt.useOauth2(refreshToken, true);
+        else if(bot.getConfig().useYoutubeOauthAutoInit())
+            yt.useOauth2(null, false);
         yt.setPlaylistPageCount(bot.getConfig().getMaxYTPlaylistPages());
         registerSourceManager(yt);
 
