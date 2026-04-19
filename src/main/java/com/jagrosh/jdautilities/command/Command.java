@@ -2,7 +2,7 @@ package com.jagrosh.jdautilities.command;
 
 import java.util.function.Predicate;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public abstract class Command
 {

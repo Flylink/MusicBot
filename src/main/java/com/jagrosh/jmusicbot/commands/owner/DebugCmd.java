@@ -15,6 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.owner;
 
+import java.nio.charset.StandardCharsets;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo;
 import com.jagrosh.jmusicbot.Bot;
@@ -23,7 +24,8 @@ import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
  *
@@ -80,7 +82,7 @@ public class DebugCmd extends OwnerCommand
         
         if(event.isFromType(ChannelType.PRIVATE) 
                 || event.getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ATTACH_FILES))
-            event.getChannel().sendFile(sb.toString().getBytes(), "debug_information.txt").queue();
+            event.getChannel().sendFiles(FileUpload.fromData(sb.toString().getBytes(StandardCharsets.UTF_8), "debug_information.txt")).queue();
         else
             event.reply("Debug Information: " + sb.toString());
     }
