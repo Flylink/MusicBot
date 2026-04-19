@@ -57,7 +57,28 @@ public class CommandEvent
     public void replyError(String text){ reply(client.getError() + " " + text); }
     public void replyError(String text, Consumer<Message> success){ reply(client.getError() + " " + text, success); }
     public void async(Runnable runnable){ client.getScheduleExecutor().submit(runnable); }
-    public static ArrayList<String> splitMessage(String input){ return new ArrayList<>(Arrays.asList(input)); }
+    public static ArrayList<String> splitMessage(String input)
+    {
+        ArrayList<String> parts = new ArrayList<>();
+        if(input == null || input.isEmpty())
+        {
+            parts.add("");
+            return parts;
+        }
+
+        String remaining = input;
+        while(remaining.length() > 2000)
+        {
+            int split = remaining.lastIndexOf('\n', 2000);
+            if(split <= 0)
+                split = 2000;
+            parts.add(remaining.substring(0, split));
+            remaining = remaining.substring(split).stripLeading();
+        }
+        if(!remaining.isEmpty())
+            parts.add(remaining);
+        return parts;
+    }
 
     public SelfUser getSelfUser(){ return event.getJDA().getSelfUser(); }
     public Member getSelfMember(){ return event.isFromGuild() ? event.getGuild().getSelfMember() : null; }

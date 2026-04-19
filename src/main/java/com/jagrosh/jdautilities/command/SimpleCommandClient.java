@@ -150,7 +150,13 @@ class SimpleCommandClient extends ListenerAdapter implements CommandClient
                     builder.append(" ").append(command.getArguments());
                 builder.append("` - ").append(command.getHelp() == null ? "no description" : command.getHelp());
             }
-            event.reply(builder.toString());
+            java.util.List<String> parts = CommandEvent.splitMessage(builder.toString());
+            if(parts.isEmpty())
+                return;
+            event.reply(parts.get(0), message -> {
+                for(int i = 1; i < parts.size(); i++)
+                    event.reply(parts.get(i));
+            });
             return;
         }
 
@@ -181,7 +187,13 @@ class SimpleCommandClient extends ListenerAdapter implements CommandClient
                     builder.append(" ").append(child.getArguments());
             }
         }
-        event.reply(builder.toString());
+        java.util.List<String> parts = CommandEvent.splitMessage(builder.toString());
+        if(parts.isEmpty())
+            return;
+        event.reply(parts.get(0), message -> {
+            for(int i = 1; i < parts.size(); i++)
+                event.reply(parts.get(i));
+        });
     }
 
     @Override public String getPrefix(){ return prefix; }
